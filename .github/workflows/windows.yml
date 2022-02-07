@@ -1,0 +1,24 @@
+name: Windows
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-2019, windows-2022]
+        toolset: [MSVC]
+        configuration: [Debug, Release]
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}.${{ matrix.toolset }}.${{ matrix.configuration }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: set toolset
+      if: matrix.toolset == 'ClangCL'
+      run: echo "toolset=-T ${{ matrix.toolset }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+    - name: configure
+      run: cmake -D BUILD_TESTS=1 -A Win32 ${{ env.toolset }} -S . -B build
+    - name: build
+      run: cmake --build build --config ${{ matrix.configuration }}
+    - name: run unit tests
+      run: cd build && ctest --output-on-failure --schedule-random -j $env:NUMBER_OF_PROCESSORS
