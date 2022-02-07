@@ -12,7 +12,7 @@ FetchContent_Declare(
 set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(Tests FastcallTests.cpp ThiscallTests.cpp)
+add_executable(Tests FastcallTests.cpp ThiscallTests.cpp StdcallTests.cpp)
 target_link_libraries(Tests gtest_main Threads::Threads)
 
 include(GoogleTest)
