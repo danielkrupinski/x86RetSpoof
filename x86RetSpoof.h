@@ -34,11 +34,17 @@ namespace x86RetSpoof
         struct Context;
     }
 
-    template <typename T, typename ...Args>
+    template <typename T, typename... Args>
     T invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
         return invokeFastcall<T>(ecx, edx, context, functionAddress, gadgetAddress, std::forward<Args>(args)...);
+    }
+
+    template <typename T, typename... Args>
+    T invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    {
+        return invokeFastcall<T>(ecx, 0, functionAddress, gadgetAddress, std::forward<Args>(args)...);
     }
 
     namespace detail
