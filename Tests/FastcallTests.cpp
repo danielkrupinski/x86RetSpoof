@@ -24,3 +24,9 @@ TEST(InvokeFastcallTest, 64bitIntegerIsReturnedCorrectly) {
     std::uint64_t(__fastcall* const function)() = []{ return value; };
     EXPECT_EQ(x86RetSpoof::invokeFastcall<std::uint64_t>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
+
+TEST(InvokeFastcallTest, FloatIsReturnedCorrectly) {
+    static constexpr float value = 3.1415f;
+    float(__fastcall* const function)() = []{ return value; };
+    EXPECT_FLOAT_EQ(x86RetSpoof::invokeFastcall<float>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
+}

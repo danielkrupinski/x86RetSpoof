@@ -24,3 +24,9 @@ TEST(InvokeStdcallTest, 64bitIntegerIsReturnedCorrectly) {
     std::uint64_t(__stdcall* const function)() = []{ return value; };
     EXPECT_EQ(x86RetSpoof::invokeStdcall<std::uint64_t>(std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
+
+TEST(InvokeStdcallTest, FloatIsReturnedCorrectly) {
+    static constexpr float value = 3.1415f;
+    float(__stdcall* const function)() = []{ return value; };
+    EXPECT_FLOAT_EQ(x86RetSpoof::invokeStdcall<float>(std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
+}
