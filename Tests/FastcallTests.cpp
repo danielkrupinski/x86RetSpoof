@@ -1,6 +1,7 @@
 #include <array>
 #include <cstdint>
 #include <intrin.h>
+#include <limits>
 
 #include <gtest/gtest.h>
 
@@ -19,7 +20,7 @@ TEST(InvokeFastcallTest, ReturnAddressOfTheInvokedFunctionIsTheAddressOfTheGadge
 }
 
 TEST(InvokeFastcallTest, 64bitIntegerIsReturnedCorrectly) {
-    static constexpr std::uint64_t value = 0xFEDCBA98764321;
+    static constexpr std::uint64_t value = (std::numeric_limits<std::uint64_t>::max)();
     std::uint64_t(__fastcall* const function)() = []{ return value; };
     EXPECT_EQ(x86RetSpoof::invokeFastcall<std::uint64_t>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }

@@ -1,6 +1,7 @@
 #include <array>
 #include <cstdint>
 #include <intrin.h>
+#include <limits>
 
 #include <gtest/gtest.h>
 
@@ -19,7 +20,7 @@ TEST(InvokeStdcallTest, ReturnAddressOfTheInvokedFunctionIsTheAddressOfTheGadget
 }
 
 TEST(InvokeStdcallTest, 64bitIntegerIsReturnedCorrectly) {
-    static constexpr std::uint64_t value = 0xFEDCBA98764321;
+    static constexpr std::uint64_t value = (std::numeric_limits<std::uint64_t>::max)();
     std::uint64_t(__stdcall* const function)() = []{ return value; };
     EXPECT_EQ(x86RetSpoof::invokeStdcall<std::uint64_t>(std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
