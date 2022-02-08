@@ -30,3 +30,9 @@ TEST(InvokeThiscallTest, FloatIsReturnedCorrectly) {
     float(__fastcall* const function)() = []{ return value; };
     EXPECT_FLOAT_EQ(x86RetSpoof::invokeThiscall<float>(0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
+
+TEST(InvokeThiscallTest, EcxContainsCorrectValueInTheInvokedFunction) {
+    static constexpr int value = 12345;
+    int(__fastcall* const function)(int ecx) = [](int ecx) { return ecx; };
+    EXPECT_EQ(x86RetSpoof::invokeThiscall<int>(value, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
+}
