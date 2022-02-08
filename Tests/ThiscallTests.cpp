@@ -17,3 +17,9 @@ static void* __fastcall getReturnAddressOfMyself()
 TEST(InvokeThiscallTest, ReturnAddressOfTheInvokedFunctionIsTheAddressOfTheGadget) {
     EXPECT_EQ(x86RetSpoof::invokeThiscall<void*>(0, std::uintptr_t(&getReturnAddressOfMyself), std::uintptr_t(gadget.data())), gadget.data());
 }
+
+TEST(InvokeThiscallTest, 64bitIntegerIsReturnedCorrectly) {
+    static constexpr std::uint64_t value = 0xFEDCBA98764321;
+    std::uint64_t(__fastcall* const function)() = []{ return value; };
+    EXPECT_EQ(x86RetSpoof::invokeThiscall<std::uint64_t>(0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
+}

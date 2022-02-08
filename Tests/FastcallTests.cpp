@@ -1,4 +1,5 @@
 #include <array>
+#include <cstdint>
 #include <intrin.h>
 
 #include <gtest/gtest.h>
@@ -15,4 +16,10 @@ static void* __fastcall getReturnAddressOfMyself()
 
 TEST(InvokeFastcallTest, ReturnAddressOfTheInvokedFunctionIsTheAddressOfTheGadget) {
     EXPECT_EQ(x86RetSpoof::invokeFastcall<void*>(0, 0, std::uintptr_t(&getReturnAddressOfMyself), std::uintptr_t(gadget.data())), gadget.data());
+}
+
+TEST(InvokeFastcallTest, 64bitIntegerIsReturnedCorrectly) {
+    static constexpr std::uint64_t value = 0xFEDCBA98764321;
+    std::uint64_t(__fastcall* const function)() = []{ return value; };
+    EXPECT_EQ(x86RetSpoof::invokeFastcall<std::uint64_t>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
