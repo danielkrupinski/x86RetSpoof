@@ -53,6 +53,13 @@ namespace x86RetSpoof
         return invokeThiscall<T>(0, functionAddress, gadgetAddress, std::forward<Args>(args)...);
     }
 
+    template <typename T, typename... Args>
+    T invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    {
+        detail::Context context;
+        return invokeCdecl<T>(context, functionAddress, gadgetAddress, std::forward<Args>(args)...);
+    }
+
     namespace detail
     {
         struct Context {
