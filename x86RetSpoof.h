@@ -82,5 +82,28 @@ namespace x86RetSpoof
                 ret
             }
         }
+
+        template <typename T, typename... Args>
+        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        {
+            __asm {
+                mov eax, [esp + 4] // load a reference (pointer) to context into eax
+                mov [eax], ebx // save ebx in context.ebxBackup
+                lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
+                mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
+                mov ebx, [esp] // load return address into ebx
+                mov [eax + 8], ebx // save return address in context.invokerReturnAddress
+
+                add esp, 12 // skip return address, 'context' and 'functionAddress' on stack, esp will point to the spoofed return address (gadgetAddress)
+                lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
+                jmp dword ptr[esp - 4] // jump to the function at functionAddress
+
+             returnHereFromGadget:
+                sub esp, 12
+                push [ebx + 4] // restore context.invokerReturnAddress as a return address
+                mov ebx, [ebx - 4] // restore ebx from context.ebxBackup 
+                ret
+            }
+        }
     }
 }
