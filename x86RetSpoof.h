@@ -1,4 +1,13 @@
 /*
+x86RetSpoof - https://github.com/danielkrupinski/x86RetSpoof
+
+Invoke functions with a spoofed return address.
+For 32-bit Windows binaries.
+Supports __fastcall, __thiscall, __stdcall and __cdecl calling conventions.
+Written in C++17.
+*/
+
+/*
 MIT License
 
 Copyright (c) 2022 Daniel Krupiński
