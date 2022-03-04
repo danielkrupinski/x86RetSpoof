@@ -44,26 +44,26 @@ namespace x86RetSpoof
     }
 
     template <typename T, typename... Args>
-    T invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    T invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args&&... args) noexcept
     {
         detail::Context context;
         return invokeFastcall<T>(ecx, edx, context, functionAddress, gadgetAddress, std::forward<Args>(args)...);
     }
 
     template <typename T, typename... Args>
-    T invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    T invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args&&... args) noexcept
     {
         return invokeFastcall<T>(ecx, 0, functionAddress, gadgetAddress, std::forward<Args>(args)...);
     }
 
     template <typename T, typename... Args>
-    T invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    T invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args&&... args) noexcept
     {
         return invokeThiscall<T>(0, functionAddress, gadgetAddress, std::forward<Args>(args)...);
     }
 
     template <typename T, typename... Args>
-    T invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    T invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args&&... args) noexcept
     {
         detail::Context context;
         return invokeCdecl<T>(context, functionAddress, gadgetAddress, std::forward<Args>(args)...);
@@ -78,7 +78,7 @@ namespace x86RetSpoof
         };
 
         template <typename T, typename... Args>
-        __declspec(naked) T __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) T __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args&&... args) noexcept
         {
             __asm {
                 mov eax, [esp + 4] // load a reference (pointer) to context into eax
@@ -100,7 +100,7 @@ namespace x86RetSpoof
         }
 
         template <typename T, typename... Args>
-        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args&&... args) noexcept
         {
             __asm {
                 mov eax, [esp + 4] // load a reference (pointer) to context into eax
