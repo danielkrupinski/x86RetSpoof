@@ -30,3 +30,10 @@ TEST(InvokeCdeclTest, FloatIsReturnedCorrectly) {
     float(__cdecl* const function)() = []{ return value; };
     EXPECT_FLOAT_EQ(x86RetSpoof::invokeCdecl<float>(std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
+
+TEST(InvokeCdeclTest, ExplicitReferenceArgumentIsPassedCorrectly) {
+    void(__cdecl* const function)(unsigned& value) = [](unsigned& value) { value = 0xDEADBEEF; };
+    unsigned number = 0;
+    x86RetSpoof::invokeCdecl<void, unsigned&>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number);
+    EXPECT_EQ(number, 0xDEADBEEF);
+}
