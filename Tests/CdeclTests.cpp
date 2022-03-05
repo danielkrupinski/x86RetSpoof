@@ -5,10 +5,8 @@
 
 #include <gtest/gtest.h>
 
+#include "Gadget.h"
 #include "x86RetSpoof.h"
-
-#pragma section(".text")
-__declspec(allocate(".text")) constexpr std::array<std::uint8_t, 2> gadget{ 0xFF, 0x23 }; // jmp dword ptr[ebx]
 
 static void* __cdecl getReturnAddressOfMyself()
 {
