@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <intrin.h>
 #include <limits>
 
@@ -33,5 +34,12 @@ TEST(InvokeStdcallTest, ExplicitReferenceArgumentIsNotCopied) {
     void(__stdcall* const function)(unsigned& value) = [](unsigned& value) { value = 0xDEADBEEF; };
     unsigned number = 0;
     x86RetSpoof::invokeStdcall<void, unsigned&>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number);
+    EXPECT_EQ(number, 0xDEADBEEF);
+}
+
+TEST(InvokeStdcallTest, ReferenceArgumentIsDeducedCorrectly) {
+    void(__stdcall* const function)(unsigned& value) = [](unsigned& value) { value = 0xDEADBEEF; };
+    unsigned number = 0;
+    x86RetSpoof::invokeStdcall<void>(std::uintptr_t(function), std::uintptr_t(gadget.data()), std::ref(number));
     EXPECT_EQ(number, 0xDEADBEEF);
 }
