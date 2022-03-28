@@ -46,7 +46,7 @@ TEST(InvokeFastcallTest, EcxAndEdxContainCorrectValueInTheInvokedFunction) {
     EXPECT_EQ(x86RetSpoof::invokeFastcall<unsigned>(0xDEAD, 0xBEEF, std::uintptr_t(function), std::uintptr_t(gadget.data())), 0xDEADBEEF);
 }
 
-TEST(InvokeFastcallTest, ExplicitReferenceArgumentIsPassedCorrectly) {
+TEST(InvokeFastcallTest, ExplicitReferenceArgumentIsNotCopied) {
     void(__fastcall* const function)(int ecx, int edx, unsigned& value) = [](int, int, unsigned& value) { value = 0xDEADBEEF; };
     unsigned number = 0;
     x86RetSpoof::invokeFastcall<void, unsigned&>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()), number);

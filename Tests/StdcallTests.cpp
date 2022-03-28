@@ -29,7 +29,7 @@ TEST(InvokeStdcallTest, FloatIsReturnedCorrectly) {
     EXPECT_FLOAT_EQ(x86RetSpoof::invokeStdcall<float>(std::uintptr_t(function), std::uintptr_t(gadget.data())), value);
 }
 
-TEST(InvokeStdcallTest, ExplicitReferenceArgumentIsPassedCorrectly) {
+TEST(InvokeStdcallTest, ExplicitReferenceArgumentIsNotCopied) {
     void(__stdcall* const function)(unsigned& value) = [](unsigned& value) { value = 0xDEADBEEF; };
     unsigned number = 0;
     x86RetSpoof::invokeStdcall<void, unsigned&>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number);
