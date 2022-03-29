@@ -43,3 +43,9 @@ TEST(InvokeCdeclTest, ReferenceArgumentIsDeducedCorrectly) {
     x86RetSpoof::invokeCdecl<void>(std::uintptr_t(function), std::uintptr_t(gadget.data()), std::ref(number));
     EXPECT_EQ(number, 0xDEADBEEF);
 }
+
+TEST(InvokeCdeclTest, LvalueArgumentIsNotDeducedToReference) {
+    std::uintptr_t(__cdecl* const function)(std::uintptr_t) = [](std::uintptr_t value) { return value; };
+    std::uintptr_t number = 1234;
+    EXPECT_EQ(x86RetSpoof::invokeCdecl<std::uintptr_t>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
+}

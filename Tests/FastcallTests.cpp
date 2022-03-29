@@ -60,3 +60,9 @@ TEST(InvokeFastcallTest, ReferenceArgumentIsDeducedCorrectly) {
     x86RetSpoof::invokeFastcall<void>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()), std::ref(number));
     EXPECT_EQ(number, 0xDEADBEEF);
 }
+
+TEST(InvokeFastcallTest, LvalueArgumentIsNotDeducedToReference) {
+    std::uintptr_t(__fastcall* const function)(int ecx, int edx, std::uintptr_t) = [](int, int, std::uintptr_t value) { return value; };
+    std::uintptr_t number = 1234;
+    EXPECT_EQ(x86RetSpoof::invokeFastcall<std::uintptr_t>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
+}
