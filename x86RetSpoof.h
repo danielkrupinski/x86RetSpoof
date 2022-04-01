@@ -85,10 +85,10 @@ namespace x86RetSpoof
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
-                mov ebx, [esp] // load return address into ebx
+                pop ebx // load return address into ebx
                 mov [eax + 8], ebx // save return address in context.invokerReturnAddress
 
-                add esp, 8 // skip return address and 'context' on stack
+                add esp, 4 // skip return address and 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
                 ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
 
@@ -107,10 +107,10 @@ namespace x86RetSpoof
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
-                mov ebx, [esp] // load return address into ebx
+                pop ebx // load return address into ebx
                 mov [eax + 8], ebx // save return address in context.invokerReturnAddress
 
-                add esp, 8 // skip return address and 'context' on stack
+                add esp, 4 // skip return address and 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
                 ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
 
