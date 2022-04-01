@@ -88,9 +88,9 @@ namespace x86RetSpoof
                 mov ebx, [esp] // load return address into ebx
                 mov [eax + 8], ebx // save return address in context.invokerReturnAddress
 
-                add esp, 12 // skip return address, 'context' and 'functionAddress' on stack, esp will point to the spoofed return address (gadgetAddress)
+                add esp, 8 // skip return address and 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
-                jmp dword ptr[esp - 4] // jump to the function at functionAddress
+                ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
 
              returnHereFromGadget:
                 push [ebx + 4] // restore context.invokerReturnAddress as a return address
@@ -110,9 +110,9 @@ namespace x86RetSpoof
                 mov ebx, [esp] // load return address into ebx
                 mov [eax + 8], ebx // save return address in context.invokerReturnAddress
 
-                add esp, 12 // skip return address, 'context' and 'functionAddress' on stack, esp will point to the spoofed return address (gadgetAddress)
+                add esp, 8 // skip return address and 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
-                jmp dword ptr[esp - 4] // jump to the function at functionAddress
+                ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
 
              returnHereFromGadget:
                 sub esp, 12
