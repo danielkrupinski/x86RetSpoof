@@ -85,8 +85,7 @@ namespace x86RetSpoof
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
-                pop ebx // pop return address from stack into ebx
-                mov [eax + 8], ebx // save return address in context.invokerReturnAddress
+                pop dword ptr [eax + 8] // pop return address from stack into context.invokerReturnAddress
 
                 add esp, 4 // skip 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
@@ -107,8 +106,7 @@ namespace x86RetSpoof
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
-                pop ebx // pop return address from stack into ebx
-                mov [eax + 8], ebx // save return address in context.invokerReturnAddress
+                pop dword ptr [eax + 8] // pop return address from stack into context.invokerReturnAddress
 
                 add esp, 4 // skip 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
