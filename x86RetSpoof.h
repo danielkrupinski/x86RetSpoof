@@ -47,7 +47,7 @@ namespace x86RetSpoof
     T invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeFastcall<T, Args...>(ecx, edx, context, functionAddress, gadgetAddress, args...);
+        return invokeFastcall<T, Args...>(ecx, edx, functionAddress, context, gadgetAddress, args...);
     }
 
     template <typename T, typename... Args>
@@ -66,7 +66,7 @@ namespace x86RetSpoof
     T invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeCdecl<T, Args...>(context, functionAddress, gadgetAddress, args...);
+        return invokeCdecl<T, Args...>(functionAddress, context, gadgetAddress, args...);
     }
 
     namespace detail
@@ -78,18 +78,17 @@ namespace x86RetSpoof
         };
 
         template <typename T, typename... Args>
-        __declspec(naked) T __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) T __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
-                mov eax, [esp + 4] // load a reference (pointer) to context into eax
+                mov eax, [esp + 8] // load a reference (pointer) to context into eax
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
                 pop dword ptr [eax + 8] // pop return address from stack into context.invokerReturnAddress
 
-                add esp, 4 // skip 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
-                ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
+                ret 4 // pop 'functionAddress' from stack and jump to it, skip 'context' on stack; esp will point to the spoofed return address (gadgetAddress)
 
              returnHereFromGadget:
                 push [ebx + 4] // restore context.invokerReturnAddress as a return address
@@ -99,18 +98,17 @@ namespace x86RetSpoof
         }
 
         template <typename T, typename... Args>
-        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
-                mov eax, [esp + 4] // load a reference (pointer) to context into eax
+                mov eax, [esp + 8] // load a reference (pointer) to context into eax
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
                 pop dword ptr [eax + 8] // pop return address from stack into context.invokerReturnAddress
 
-                add esp, 4 // skip 'context' on stack
                 lea ebx, [eax + 4] // load the address of context.addressToJumpToInGadget to ebx
-                ret // pop 'functionAddress' from stack and jump to it, esp will point to the spoofed return address (gadgetAddress)
+                ret 4 // pop 'functionAddress' from stack and jump to it, skip 'context' on stack; esp will point to the spoofed return address (gadgetAddress)
 
              returnHereFromGadget:
                 sub esp, 12
