@@ -49,3 +49,24 @@ TEST(InvokeCdeclTest, LvalueArgumentIsNotDeducedToReference) {
     std::uintptr_t number = 1234;
     EXPECT_EQ(x86RetSpoof::invokeCdecl<std::uintptr_t>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
 }
+
+#define TEST_REGISTER_PRESERVED(registerName) \
+TEST(InvokeCdeclTest, registerName##RegisterIsPreserved) { \
+    void(__cdecl* const function)() = [] {}; \
+\
+    std::uintptr_t registerName##BeforeCall = 0; \
+    __asm { mov registerName##BeforeCall, registerName } \
+\
+    x86RetSpoof::detail::Context context; \
+    x86RetSpoof::detail::invokeCdecl<void>(std::uintptr_t(function), context, std::uintptr_t(gadget.data())); \
+\
+    std::uintptr_t registerName##AfterCall = 0; \
+    __asm { mov registerName##AfterCall, registerName } \
+\
+    EXPECT_EQ(registerName##BeforeCall, registerName##AfterCall); \
+}
+
+TEST_REGISTER_PRESERVED(ebx);
+TEST_REGISTER_PRESERVED(ebp);
+TEST_REGISTER_PRESERVED(esi);
+TEST_REGISTER_PRESERVED(edi);
