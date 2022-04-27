@@ -52,16 +52,23 @@ TEST(InvokeCdeclTest, LvalueArgumentIsNotDeducedToReference) {
 
 #define TEST_REGISTER_PRESERVED(registerName) \
 TEST(InvokeCdeclTest, registerName##RegisterIsPreserved) { \
+    void(__cdecl* const invokeCdecl)(std::uintptr_t, x86RetSpoof::detail::Context&, std::uintptr_t) = x86RetSpoof::detail::invokeCdecl<void>; \
     void(__cdecl* const function)() = [] {}; \
+    x86RetSpoof::detail::Context context; \
+    const auto addressOfGadget = std::uintptr_t(gadget.data()); \
 \
     std::uintptr_t registerName##BeforeCall = 0; \
-    __asm { mov registerName##BeforeCall, registerName } \
-\
-    x86RetSpoof::detail::Context context; \
-    x86RetSpoof::detail::invokeCdecl<void>(std::uintptr_t(function), context, std::uintptr_t(gadget.data())); \
-\
     std::uintptr_t registerName##AfterCall = 0; \
-    __asm { mov registerName##AfterCall, registerName } \
+    __asm { \
+        __asm mov registerName##BeforeCall, registerName \
+        __asm push addressOfGadget \
+        __asm lea eax, context \
+        __asm push eax \
+        __asm push function \
+        __asm call invokeCdecl \
+        __asm add esp, 12 \
+        __asm mov registerName##AfterCall, registerName \
+    } \
 \
     EXPECT_EQ(registerName##BeforeCall, registerName##AfterCall); \
 }
