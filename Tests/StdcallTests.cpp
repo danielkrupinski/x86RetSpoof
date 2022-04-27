@@ -49,3 +49,30 @@ TEST(InvokeStdcallTest, LvalueArgumentIsNotDeducedToReference) {
     std::uintptr_t number = 1234;
     EXPECT_EQ(x86RetSpoof::invokeStdcall<std::uintptr_t>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
 }
+
+#define TEST_REGISTER_PRESERVED(registerName) \
+TEST(InvokeStdcallTest, registerName##RegisterIsPreserved) { \
+    void(__fastcall* const invokeFastcall)(std::uintptr_t, std::uintptr_t, std::uintptr_t, x86RetSpoof::detail::Context&, std::uintptr_t) = x86RetSpoof::detail::invokeFastcall<void>; \
+    void(__stdcall* const function)() = [] {}; \
+    x86RetSpoof::detail::Context context; \
+    const auto addressOfGadget = std::uintptr_t(gadget.data()); \
+\
+    std::uintptr_t registerName##BeforeCall = 0; \
+    std::uintptr_t registerName##AfterCall = 0; \
+    __asm { \
+        __asm mov registerName##BeforeCall, registerName \
+        __asm push addressOfGadget \
+        __asm lea eax, context \
+        __asm push eax \
+        __asm push function \
+        __asm call invokeFastcall \
+        __asm mov registerName##AfterCall, registerName \
+    } \
+\
+    EXPECT_EQ(registerName##BeforeCall, registerName##AfterCall); \
+}
+
+TEST_REGISTER_PRESERVED(ebx);
+TEST_REGISTER_PRESERVED(ebp);
+TEST_REGISTER_PRESERVED(esi);
+TEST_REGISTER_PRESERVED(edi);
