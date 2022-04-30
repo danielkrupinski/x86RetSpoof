@@ -4,6 +4,7 @@
 #include <intrin.h>
 #include <limits>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Gadget.h"
@@ -48,6 +49,17 @@ TEST(InvokeCdeclTest, LvalueArgumentIsNotDeducedToReference) {
     std::uintptr_t(__cdecl* const function)(std::uintptr_t) = [](std::uintptr_t value) { return value; };
     std::uintptr_t number = 1234;
     EXPECT_EQ(x86RetSpoof::invokeCdecl<std::uintptr_t>(std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
+}
+
+TEST(InvokeCdeclTest, FunctionIsInvokedOncePerCall) {
+    struct Mock {
+        MOCK_METHOD(void, called, (), (const));
+    };
+    static const Mock mock;
+
+    void(__cdecl* const function)() = []() { mock.called(); };
+    EXPECT_CALL(mock, called());
+    x86RetSpoof::invokeCdecl<void>(std::uintptr_t(function), std::uintptr_t(gadget.data()));
 }
 
 #define TEST_REGISTER_PRESERVED(registerName) \
