@@ -4,6 +4,7 @@
 #include <intrin.h>
 #include <limits>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Gadget.h"
@@ -65,6 +66,17 @@ TEST(InvokeFastcallTest, LvalueArgumentIsNotDeducedToReference) {
     std::uintptr_t(__fastcall* const function)(int ecx, int edx, std::uintptr_t) = [](int, int, std::uintptr_t value) { return value; };
     std::uintptr_t number = 1234;
     EXPECT_EQ(x86RetSpoof::invokeFastcall<std::uintptr_t>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
+}
+
+TEST(InvokeFastcallTest, FunctionIsInvokedOncePerCall) {
+    struct Mock {
+        MOCK_METHOD(void, called, (), (const));
+    };
+    static const Mock mock;
+
+    void(__fastcall* const function)(int ecx, int edx) = [](int, int) { mock.called(); };
+    EXPECT_CALL(mock, called());
+    x86RetSpoof::invokeFastcall<void>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()));
 }
 
 #define TEST_REGISTER_PRESERVED(registerName) \
