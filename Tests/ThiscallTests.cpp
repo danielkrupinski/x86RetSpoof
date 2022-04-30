@@ -3,7 +3,9 @@
 #include <functional>
 #include <intrin.h>
 #include <limits>
+#include <memory>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Gadget.h"
@@ -54,6 +56,19 @@ TEST(InvokeThiscallTest, LvalueArgumentIsNotDeducedToReference) {
     std::uintptr_t(__fastcall* const function)(int ecx, int edx, std::uintptr_t) = [](int, int, std::uintptr_t value) { return value; };
     std::uintptr_t number = 1234;
     EXPECT_EQ(x86RetSpoof::invokeThiscall<std::uintptr_t>(0, std::uintptr_t(function), std::uintptr_t(gadget.data()), number), std::uintptr_t(1234));
+}
+
+TEST(InvokeThiscallTest, FunctionIsInvokedOncePerCall) {
+    struct Mock {
+        MOCK_METHOD(void, called, (), (const));
+    };
+    static std::unique_ptr<Mock> mock;
+    mock = std::make_unique<Mock>();
+
+    void(__fastcall* const function)() = []{ mock->called(); };
+    EXPECT_CALL(*mock.get(), called());
+    x86RetSpoof::invokeThiscall<void>(0, std::uintptr_t(function), std::uintptr_t(gadget.data()));
+    mock.reset();
 }
 
 #define TEST_REGISTER_PRESERVED(registerName) \
