@@ -55,11 +55,13 @@ TEST(InvokeCdeclTest, FunctionIsInvokedOncePerCall) {
     struct Mock {
         MOCK_METHOD(void, called, (), (const));
     };
-    static const Mock mock;
+    static std::unique_ptr<Mock> mock;
+    mock = std::make_unique<Mock>();
 
-    void(__cdecl* const function)() = []() { mock.called(); };
-    EXPECT_CALL(mock, called());
+    void(__cdecl* const function)() = []() { mock->called(); };
+    EXPECT_CALL(*mock.get(), called());
     x86RetSpoof::invokeCdecl<void>(std::uintptr_t(function), std::uintptr_t(gadget.data()));
+    mock.reset();
 }
 
 #define TEST_REGISTER_PRESERVED(registerName) \
