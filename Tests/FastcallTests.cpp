@@ -72,11 +72,13 @@ TEST(InvokeFastcallTest, FunctionIsInvokedOncePerCall) {
     struct Mock {
         MOCK_METHOD(void, called, (), (const));
     };
-    static const Mock mock;
+    static std::unique_ptr<Mock> mock;
+    mock = std::make_unique<Mock>();
 
-    void(__fastcall* const function)(int ecx, int edx) = [](int, int) { mock.called(); };
-    EXPECT_CALL(mock, called());
+    void(__fastcall* const function)() = []{ mock->called(); };
+    EXPECT_CALL(*mock.get(), called());
     x86RetSpoof::invokeFastcall<void>(0, 0, std::uintptr_t(function), std::uintptr_t(gadget.data()));
+    mock.reset();
 }
 
 #define TEST_REGISTER_PRESERVED(registerName) \
