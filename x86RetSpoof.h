@@ -43,30 +43,30 @@ namespace x86RetSpoof
         struct Context;
     }
 
-    template <typename T, typename... Args>
-    T invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... Args>
+    ReturnType invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeFastcall<T, Args...>(ecx, edx, functionAddress, context, gadgetAddress, args...);
+        return invokeFastcall<ReturnType, Args...>(ecx, edx, functionAddress, context, gadgetAddress, args...);
     }
 
-    template <typename T, typename... Args>
-    T invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... Args>
+    ReturnType invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
-        return invokeFastcall<T, Args...>(ecx, 0, functionAddress, gadgetAddress, args...);
+        return invokeFastcall<ReturnType, Args...>(ecx, 0, functionAddress, gadgetAddress, args...);
     }
 
-    template <typename T, typename... Args>
-    T invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... Args>
+    ReturnType invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
-        return invokeThiscall<T, Args...>(0, functionAddress, gadgetAddress, args...);
+        return invokeThiscall<ReturnType, Args...>(0, functionAddress, gadgetAddress, args...);
     }
 
-    template <typename T, typename... Args>
-    T invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... Args>
+    ReturnType invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeCdecl<T, Args...>(functionAddress, context, gadgetAddress, args...);
+        return invokeCdecl<ReturnType, Args...>(functionAddress, context, gadgetAddress, args...);
     }
 
     namespace detail
@@ -77,8 +77,8 @@ namespace x86RetSpoof
             std::uintptr_t invokerReturnAddress;
         };
 
-        template <typename T, typename... Args>
-        __declspec(naked) T __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        template <typename ReturnType, typename... Args>
+        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a reference (pointer) to context into eax
@@ -97,8 +97,8 @@ namespace x86RetSpoof
             }
         }
 
-        template <typename T, typename... Args>
-        __declspec(naked) T __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        template <typename ReturnType, typename... Args>
+        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a reference (pointer) to context into eax
