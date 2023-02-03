@@ -66,7 +66,7 @@ TEST(InvokeCdeclTest, FunctionIsInvokedOncePerCall) {
 
 #define TEST_REGISTER_PRESERVED(registerName) \
 TEST(InvokeCdeclTest, registerName##RegisterIsPreserved) { \
-    void(__cdecl* const invokeCdecl)(std::uintptr_t, x86RetSpoof::detail::Context&, std::uintptr_t) = x86RetSpoof::detail::invokeCdecl<void>; \
+    void(__cdecl* const invokeCdecl)(std::uintptr_t, x86RetSpoof::detail::Context*, std::uintptr_t) = x86RetSpoof::detail::invokeCdecl<void>; \
     void(__cdecl* const function)() = [] {}; \
     x86RetSpoof::detail::Context context; \
     const auto addressOfGadget = std::uintptr_t(gadget.data()); \

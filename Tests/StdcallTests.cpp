@@ -67,7 +67,7 @@ TEST(InvokeStdcallTest, FunctionIsInvokedOncePerCall) {
 
 #define TEST_REGISTER_PRESERVED(registerName) \
 TEST(InvokeStdcallTest, registerName##RegisterIsPreserved) { \
-    void(__fastcall* const invokeFastcall)(std::uintptr_t, std::uintptr_t, std::uintptr_t, x86RetSpoof::detail::Context&, std::uintptr_t) = x86RetSpoof::detail::invokeFastcall<void>; \
+    void(__fastcall* const invokeFastcall)(std::uintptr_t, std::uintptr_t, std::uintptr_t, x86RetSpoof::detail::Context*, std::uintptr_t) = x86RetSpoof::detail::invokeFastcall<void>; \
     void(__stdcall* const function)() = [] {}; \
     x86RetSpoof::detail::Context context; \
     const auto addressOfGadget = std::uintptr_t(gadget.data()); \

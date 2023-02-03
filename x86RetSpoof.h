@@ -47,7 +47,7 @@ namespace x86RetSpoof
     ReturnType invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeFastcall<ReturnType, Args...>(ecx, edx, functionAddress, context, gadgetAddress, args...);
+        return invokeFastcall<ReturnType, Args...>(ecx, edx, functionAddress, &context, gadgetAddress, args...);
     }
 
     template <typename ReturnType, typename... Args>
@@ -66,7 +66,7 @@ namespace x86RetSpoof
     ReturnType invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
     {
         detail::Context context;
-        return invokeCdecl<ReturnType, Args...>(functionAddress, context, gadgetAddress, args...);
+        return invokeCdecl<ReturnType, Args...>(functionAddress, &context, gadgetAddress, args...);
     }
 
     namespace detail
@@ -78,10 +78,10 @@ namespace x86RetSpoof
         };
 
         template <typename ReturnType, typename... Args>
-        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
-                mov eax, [esp + 8] // load a reference (pointer) to context into eax
+                mov eax, [esp + 8] // load a pointer to context into eax
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
@@ -98,10 +98,10 @@ namespace x86RetSpoof
         }
 
         template <typename ReturnType, typename... Args>
-        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context& context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
         {
             __asm {
-                mov eax, [esp + 8] // load a reference (pointer) to context into eax
+                mov eax, [esp + 8] // load a pointer to context into eax
                 mov [eax], ebx // save ebx in context.ebxBackup
                 lea ebx, returnHereFromGadget // load the address of the label we want the gadget to jump to
                 mov [eax + 4], ebx // save the address of 'returnHereFromGadget' in context.addressToJumpToInGadget
