@@ -5,6 +5,8 @@ Invoke functions with a spoofed return address.
 For 32-bit Windows binaries.
 Supports __fastcall, __thiscall, __stdcall and __cdecl calling conventions.
 Written in C++17.
+
+Version: 17 February 2023
 */
 
 /*
@@ -43,30 +45,30 @@ namespace x86RetSpoof
         struct Context;
     }
 
-    template <typename ReturnType, typename... Args>
-    ReturnType invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... StackArgs>
+    ReturnType invokeFastcall(std::uintptr_t ecx, std::uintptr_t edx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, StackArgs... stackArgs) noexcept
     {
         detail::Context context;
-        return invokeFastcall<ReturnType, Args...>(ecx, edx, functionAddress, &context, gadgetAddress, args...);
+        return invokeFastcall<ReturnType, StackArgs...>(ecx, edx, functionAddress, &context, gadgetAddress, stackArgs...);
     }
 
-    template <typename ReturnType, typename... Args>
-    ReturnType invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... StackArgs>
+    ReturnType invokeThiscall(std::uintptr_t ecx, std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, StackArgs... stackArgs) noexcept
     {
-        return invokeFastcall<ReturnType, Args...>(ecx, 0, functionAddress, gadgetAddress, args...);
+        return invokeFastcall<ReturnType, StackArgs...>(ecx, 0, functionAddress, gadgetAddress, stackArgs...);
     }
 
-    template <typename ReturnType, typename... Args>
-    ReturnType invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... StackArgs>
+    ReturnType invokeStdcall(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, StackArgs... stackArgs) noexcept
     {
-        return invokeThiscall<ReturnType, Args...>(0, functionAddress, gadgetAddress, args...);
+        return invokeThiscall<ReturnType, StackArgs...>(0, functionAddress, gadgetAddress, stackArgs...);
     }
 
-    template <typename ReturnType, typename... Args>
-    ReturnType invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, Args... args) noexcept
+    template <typename ReturnType, typename... StackArgs>
+    ReturnType invokeCdecl(std::uintptr_t functionAddress, std::uintptr_t gadgetAddress, StackArgs... stackArgs) noexcept
     {
         detail::Context context;
-        return invokeCdecl<ReturnType, Args...>(functionAddress, &context, gadgetAddress, args...);
+        return invokeCdecl<ReturnType, StackArgs...>(functionAddress, &context, gadgetAddress, stackArgs...);
     }
 
     namespace detail
@@ -77,8 +79,8 @@ namespace x86RetSpoof
             std::uintptr_t invokerReturnAddress;
         };
 
-        template <typename ReturnType, typename... Args>
-        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        template <typename ReturnType, typename... StackArgs>
+        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] StackArgs... stackArgs) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a pointer to context into eax
@@ -97,8 +99,8 @@ namespace x86RetSpoof
             }
         }
 
-        template <typename ReturnType, typename... Args>
-        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] Args... args) noexcept
+        template <typename ReturnType, typename... StackArgs>
+        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] StackArgs... stackArgs) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a pointer to context into eax
