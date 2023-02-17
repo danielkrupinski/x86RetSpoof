@@ -80,7 +80,7 @@ namespace x86RetSpoof
         };
 
         template <typename ReturnType, typename... StackArgs>
-        __declspec(naked) ReturnType __fastcall invokeFastcall([[maybe_unused]] std::uintptr_t ecx, [[maybe_unused]] std::uintptr_t edx, [[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] StackArgs... stackArgs) noexcept
+        __declspec(naked) ReturnType __fastcall invokeFastcall(std::uintptr_t /*ecx*/, std::uintptr_t /*edx*/, std::uintptr_t /*functionAddress*/, Context* /*context*/, std::uintptr_t /*gadgetAddress*/, StackArgs... /*stackArgs*/) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a pointer to context into eax
@@ -100,7 +100,7 @@ namespace x86RetSpoof
         }
 
         template <typename ReturnType, typename... StackArgs>
-        __declspec(naked) ReturnType __cdecl invokeCdecl([[maybe_unused]] std::uintptr_t functionAddress, [[maybe_unused]] Context* context, [[maybe_unused]] std::uintptr_t gadgetAddress, [[maybe_unused]] StackArgs... stackArgs) noexcept
+        __declspec(naked) ReturnType __cdecl invokeCdecl(std::uintptr_t /*functionAddress*/, Context* /*context*/, std::uintptr_t /*gadgetAddress*/, StackArgs... /*stackArgs*/) noexcept
         {
             __asm {
                 mov eax, [esp + 8] // load a pointer to context into eax
